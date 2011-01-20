@@ -80,12 +80,12 @@ Log to a central MongoDB from Rails apps.
           Rails.logger.add_metadata(:user_guid => @user_guid)
         end
 
-## Querying and Viewing
+## Central Log Viewer
 
   Please see the [central\_log\_viewer](https://github.com/customink/central_log_viewer):
   a companion web application for querying and viewing your centralized logs.
 
-## Querying in Rails Console
+## Querying via the Rails console
 
 And now, for a couple quick examples on getting ahold of this log data...
 First, here's how to get a handle on the MongoDB from within a Rails console:
@@ -120,4 +120,4 @@ Find all requests with a request_date greater than '11/18/2010 22:59:52 GMT'
 
     >> collection.find({:request_time => {'$gt' => Time.utc(2010, 11, 18, 22, 59, 52)}})
 
-Copyright (c) 2009 Phil Burrows, released under the MIT license
+Copyright (c) 2009-2011 Phil Burrows and CustomInk, released under the MIT license
