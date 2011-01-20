@@ -80,7 +80,12 @@ Log to a central MongoDB from Rails apps.
           Rails.logger.add_metadata(:user_guid => @user_guid)
         end
 
-## Examples
+## Querying and Viewing
+
+  Please see the [central\_log\_viewer](https://github.com/customink/central_log_viewer):
+  a companion web application for querying and viewing your centralized logs.
+
+## Querying in Rails Console
 
 And now, for a couple quick examples on getting ahold of this log data...
 First, here's how to get a handle on the MongoDB from within a Rails console:
