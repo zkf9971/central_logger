@@ -81,6 +81,10 @@ class CentralLogger::MongoLoggerTest < Test::Unit::TestCase
           assert_equal "central_foo", @central_logger.instance_variable_get(:@application_name)
         end
 
+        should "set safe insert when specified in the config file" do
+          assert @central_logger.instance_variable_get(:@safe_insert)
+        end
+
         should "use the database name in the config file" do
           assert_equal "system_log", @central_logger.db_configuration['database']
         end

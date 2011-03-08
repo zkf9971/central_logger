@@ -96,9 +96,10 @@ module CentralLogger
           'port' => 27017,
           'capsize' => default_capsize}.merge(resolve_config)
         @application_name = resolve_application_name
+        @safe_insert = @db_configuration['safe_insert'] || false
 
         @insert_block = @db_configuration.has_key?('replica_set') && @db_configuration['replica_set'] ?
-          lambda { rescue_connection_failure{ insert_log_record(true) } } :
+          lambda { rescue_connection_failure{ insert_log_record(@safe_insert) } } :
           lambda { insert_log_record }
       end
 

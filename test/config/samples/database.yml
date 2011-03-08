@@ -5,3 +5,4 @@ test:
   mongo:
     database: system_log
     application_name: central_foo
+    safe_insert: true
