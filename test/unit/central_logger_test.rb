@@ -151,9 +151,14 @@ class CentralLogger::MongoLoggerTest < Test::Unit::TestCase
         assert_equal 1, @collection.find({"application" => self.class.name}).count
       end
 
-      should "not raise an exception when bson-unserializable data is logged" do
+      should "not raise an exception when bson-unserializable data is logged in the :messages key" do
         log(Tempfile.new("foo"))
+        assert_equal 1, @collection.count
+      end
+
+      should "not raise an exception when bson-unserializable data is logged in the :params key" do
         log_params({:foo => Tempfile.new("bar")})
+        assert_equal 1, @collection.count
       end
 
       context "when an exception is raised" do
