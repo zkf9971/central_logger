@@ -12,6 +12,7 @@ module CentralLogger
     DEFAULT_COLLECTION_SIZE = 100.megabytes
     # Looks for configuration files in this order
     CONFIGURATION_FILES = ["central_logger.yml", "mongoid.yml", "database.yml"]
+    LOG_LEVEL_SYM = [:debug, :info, :warn, :error, :fatal, :unknown]
 
     attr_reader :db_configuration, :mongo_connection, :mongo_collection_name, :mongo_collection
 
@@ -40,7 +41,7 @@ module CentralLogger
       if @level <= severity && message.present? && @mongo_record.present?
         # remove Rails colorization to get the actual message
         message.gsub!(/(\e(\[([\d;]*[mz]?))?)?/, '').strip! if logging_colorized?
-        @mongo_record[:messages][level_to_sym(severity)] << message
+        @mongo_record[:messages][LOG_LEVEL_SYM[severity]] << message
       end
     end
 
@@ -57,7 +58,7 @@ module CentralLogger
         :application_name => @application_name
       })
 
-      runtime = Benchmark.measure{ yield }.real
+      runtime = Benchmark.measure{ yield }.real if block_given?
     rescue Exception => e
       add(3, e.message + "\n" + e.backtrace.join("\n"))
       # Reraise the exception for anyone else who cares
@@ -65,7 +66,13 @@ module CentralLogger
     ensure
       # In case of exception, make sure runtime is set
       @mongo_record[:runtime] = ((runtime ||= 0) * 1000).ceil
-      @insert_block.call
+      begin
+        @insert_block.call
+      rescue
+        # do extra work to inpect (and flatten)
+        force_serialize @mongo_record
+        @insert_block.call rescue nil
+      end
     end
 
     def authenticated?
@@ -137,23 +144,25 @@ module CentralLogger
         @mongo_collection.insert(@mongo_record, :safe => safe)
       end
 
-      def level_to_sym(level)
-        case level
-          when 0 then :debug
-          when 1 then :info
-          when 2 then :warn
-          when 3 then :error
-          when 4 then :fatal
-          when 5 then :unknown
-        end
-      end
-
       def logging_colorized?
         # Cache it since these ActiveRecord attributes are assigned after logger initialization occurs in Rails boot
         @colorized ||= Object.const_defined?(:ActiveRecord) &&
         (Rails::VERSION::MAJOR >= 3 ?
           ActiveRecord::LogSubscriber.colorize_logging :
           ActiveRecord::Base.colorize_logging)
+      end
+
+      # force the data in the db by inspecting each top level array and hash element
+      # this will flatten other hashes and arrays
+      def force_serialize(rec)
+        if msgs = rec[:messages]
+          LOG_LEVEL_SYM.each do |i|
+            msgs[i].collect! { |j| j.inspect } if msgs[i]
+          end
+        end
+        if pms = rec[:params]
+          pms.each { |i, j| pms[i] = j.inspect }
+        end
       end
   end # class MongoLogger
 end

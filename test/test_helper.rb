@@ -26,6 +26,10 @@ class Test::Unit::TestCase
     end
   end
 
+  def log_params(msg)
+    @central_logger.mongoize({:params => msg})
+  end
+
   def log_exception(msg)
     @central_logger.mongoize({"id" => 1}) do
       raise msg

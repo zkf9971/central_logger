@@ -1,5 +1,6 @@
 require 'test_helper'
 require 'central_logger/mongo_logger'
+require 'tempfile'
 
 # test the basic stuff
 class CentralLogger::MongoLoggerTest < Test::Unit::TestCase
@@ -148,6 +149,11 @@ class CentralLogger::MongoLoggerTest < Test::Unit::TestCase
         options = {"application" => self.class.name}
         log_metadata(options)
         assert_equal 1, @collection.find({"application" => self.class.name}).count
+      end
+
+      should "not raise an exception when bson-unserializable data is logged" do
+        log(Tempfile.new("foo"))
+        log_params({:foo => Tempfile.new("bar")})
       end
 
       context "when an exception is raised" do
