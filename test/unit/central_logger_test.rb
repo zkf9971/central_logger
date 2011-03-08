@@ -77,6 +77,10 @@ class CentralLogger::MongoLoggerTest < Test::Unit::TestCase
           assert_equal "#{Rails.env}_log", @central_logger.mongo_collection_name
         end
 
+        should "set the application name when specified in the config file" do
+          assert_equal "central_foo", @central_logger.instance_variable_get(:@application_name)
+        end
+
         should "use the database name in the config file" do
           assert_equal "system_log", @central_logger.db_configuration['database']
         end

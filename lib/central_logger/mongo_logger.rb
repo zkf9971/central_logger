@@ -89,17 +89,30 @@ module CentralLogger
 
       def configure
         default_capsize = Rails.env.production? ? PRODUCTION_COLLECTION_SIZE : DEFAULT_COLLECTION_SIZE
-        @application_name = Rails.root.basename.to_s
         @mongo_collection_name = "#{Rails.env}_log"
         @authenticated = false
         @db_configuration = {
           'host' => 'localhost',
           'port' => 27017,
           'capsize' => default_capsize}.merge(resolve_config)
+        @application_name = resolve_application_name
 
         @insert_block = @db_configuration.has_key?('replica_set') && @db_configuration['replica_set'] ?
           lambda { rescue_connection_failure{ insert_log_record(true) } } :
           lambda { insert_log_record }
+      end
+
+      def resolve_application_name
+        if @db_configuration.has_key?('application_name')
+          @db_configuration['application_name']
+        elsif Rails::VERSION::MAJOR >= 3
+          Rails.application.class.to_s.split("::").first
+        else
+          # rails 2 requires detective work if it's been deployed by capistrano
+          # if last entry is a timestamp, go back 2 dirs (ex. /app_name/releases/20110304132847)
+          path = Rails.root.to_s.split('/')
+          path.length >= 4 && path.last =~ /^\d/ ? path.last(3)[0] : path.last
+        end
       end
 
       def resolve_config

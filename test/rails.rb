@@ -1,3 +1,8 @@
+module CentralLogger
+  class Application
+  end
+end
+
 class Rails
   module VERSION
     MAJOR = 3
@@ -9,5 +14,9 @@ class Rails
 
   def self.root
     Pathname.new(File.dirname(__FILE__))
+  end
+
+  def self.application
+    CentralLogger::Application.new
   end
 end

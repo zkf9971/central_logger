@@ -40,4 +40,14 @@ class OrderControllerTest < ActionController::TestCase
     post :create, :order => {:password => OrderController::LOG_MESSAGE }
     assert_equal 1, @collection.find_one({"params.order.password" => "[FILTERED]"})["params"]["order"].count
   end
+
+  test "should set the application name" do
+    if Rails::VERSION::MAJOR == 3
+      assert_equal 'LoggerAndRails3', @central_logger.instance_variable_get(:@application_name)
+    else
+      # 2 is the base dir, so it assumes it should go up two directories due to
+      # capistrano deployment
+      assert_equal 'test', @central_logger.instance_variable_get(:@application_name)
+    end
+  end
 end
