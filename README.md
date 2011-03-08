@@ -36,7 +36,9 @@ Log to a central MongoDB from Rails apps.
             capsize: <%= 10.megabytes %>   # default: 250MB for production; 100MB otherwise
             host: localhost                # default: localhost
             port: 27017                    # default: 27017
-            replica_set: true              # default: false - Adds safe inserts and retries for ConnectionFailure during voting
+            replica_set: true              # default: false - Adds retries for ConnectionFailure during voting for replica set master
+            safe_insert: true              # default: false - Enable/Disable safe inserts (wait for insert to propagate to all nodes)
+            application_name: my_app       # default: Rails.application - Only really needed for non-capistrano Rails 2 deployments. Otherwise should set automatically.
 
     central_logger.yml:
 
