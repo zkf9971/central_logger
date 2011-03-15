@@ -1,9 +1,9 @@
 PATH
   remote: ../../..
   specs:
-    central_logger (0.3.0)
+    central_logger (0.3.1)
       bson_ext
-      bundler (~> 1.0.0)
+      bundler
       mongo
       rake
 
