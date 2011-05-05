@@ -22,6 +22,9 @@ module CentralLogger
       internal_initialize
       if disable_file_logging?
         @level = level
+        @buffer        = {}
+        @auto_flushing = 1
+        @guard = Mutex.new
       else
         super(path, level)
       end
