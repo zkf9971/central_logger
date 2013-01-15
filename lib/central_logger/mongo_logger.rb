@@ -141,8 +141,13 @@ module CentralLogger
       end
 
       def connect
-        @mongo_connection ||= Mongo::Connection.new(@db_configuration['host'],
-                                                    @db_configuration['port']).db(@db_configuration['database'])
+        if @db_configuration['slaves'] == nil
+           @mongo_connection = Mongo::ReplSetConnection.new([@db_configuration['host'], @db_configuration['port']], 
+                                                          :read_secondary => true).db(@db_configuration['database'])
+        else
+           @mongo_connection = Mongo::ReplSetConnection.new([@db_configuration['host'], @db_configuration['port']], 
+                                                          [@db_configuration['slaves'][0]["host"], @db_configuration['slaves'][0]["port"]], :read_secondary => true).db(@db_configuration['database'])             
+        end
 
         if @db_configuration['username'] && @db_configuration['password']
           # the driver stores credentials in case reconnection is required
